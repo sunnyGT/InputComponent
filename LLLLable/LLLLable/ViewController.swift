@@ -24,14 +24,28 @@ class ViewController: UIViewController {
             self.textView.text = ""
         }
     }
+    
+    private lazy var controller = InputComponentController(from: self)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
     
     @IBAction func inputButtonTapped(_ sender: UIBarButtonItem) {
-        let vc = InputViewController.makeViewController()
-        self.present(vc, animated: false, completion: nil)
+        self.controller.showInputComponent(placeholder: nil, initialContent: nil) { behaviout, content in
+            switch behaviout {
+            case .abandon:
+                print("Abandon", content)
+            case .collect:
+                print("Collect", content)
+            }
+        }
     }
+}
+
+public protocol InputViewControllerDelegate: class {
+    
+    func inputViewControllerDidCompletion(_ viewController: InputViewController, content: String, isSendButtonDrived: Bool)
 }
 
 public final class InputViewController: UIViewController, UIViewControllerTransitioningDelegate {
@@ -57,6 +71,8 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
             self.dimmingView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dimmingViewTapped(_:))))
         }
     }
+    
+    weak var delegate: InputViewControllerDelegate? = nil
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -164,7 +180,7 @@ extension InputViewController: InputBarDelegate {
             self.view.layoutIfNeeded()
         }, completion: { _ in
             self.dismiss(animated: false, completion: {
-                print("Dismiss completion.......")
+                self.delegate?.inputViewControllerDidCompletion(self, content: bar.textView.text, isSendButtonDrived: bar.isSendButtonDrived)
             })
         })
     }
@@ -218,9 +234,12 @@ class InputBar: SafeAreaCompatibleView, UITextViewDelegate {
     
     weak var delegate: InputBarDelegate? = nil
     
+    private(set) var isSendButtonDrived: Bool = false
+    
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         if text == "\n" {
-            textView.resignFirstResponder()
+            self.isSendButtonDrived = true
+            self.textView.resignFirstResponder()
             return false
         } else {
             return true
@@ -242,7 +261,7 @@ class InputBar: SafeAreaCompatibleView, UITextViewDelegate {
 }
 
 
-public final class InputComponentController {
+public final class InputComponentController: InputViewControllerDelegate {
     
     public enum Behaviour {
         case abandon
@@ -263,22 +282,13 @@ public final class InputComponentController {
                 return
         }
         let vc = InputViewController.makeViewController(placeholder: placeholder, initialContent: initialContent)
+        vc.delegate = self
         self._block = completion
         host.present(vc, animated: false, completion: nil)
     }
-}
-
-func test() {
     
-    let controller = InputComponentController(from: UIViewController.init())
-    
-    controller.showInputComponent(placeholder: nil, initialContent: nil) { behaviout, content in
-        switch behaviout {
-        case .abandon:
-            print(content)
-        case .collect:
-            print(content)
-        }
+    public func inputViewControllerDidCompletion(_ viewController: InputViewController, content: String, isSendButtonDrived: Bool) {
+        self._block(isSendButtonDrived ? .collect : .abandon, content)
     }
 }
 
