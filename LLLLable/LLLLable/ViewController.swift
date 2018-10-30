@@ -33,6 +33,9 @@ class ViewController: UIViewController {
 
 public final class InputViewController: UIViewController, UIViewControllerTransitioningDelegate {
     
+    private var placeholder: String? = nil
+    private var initialContent: String? = nil
+    
     @IBOutlet weak var heightConstraints: NSLayoutConstraint!
     @IBOutlet weak var bottomConstraints: NSLayoutConstraint!
     @IBOutlet weak var inputBar: InputBar! {
@@ -53,6 +56,8 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
     public override func viewDidLoad() {
         super.viewDidLoad()
         self.heightConstraints.constant = 50.0
+//        self.inputBar.textView.placeholder = self.placeholder
+        self.inputBar.textView.text = self.initialContent
     }
     
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -63,33 +68,20 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
                     return
             }
             let height = max(min(value.cgSizeValue.height + 30.0, 132.0), 50.0)
-            self.updateInputBarHeight(height)
+            self.heightConstraints.constant = height
+            self.view.setNeedsLayout()
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
         } else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
     
-    private func updateInputBarHeight(_ height: CGFloat, animated: Bool = true) {
-        self.heightConstraints.constant = height
-        if animated {
-            self.view.setNeedsLayout()
-            UIView.animate(withDuration: 0.3) {
-                self.view.layoutIfNeeded()
-            }
-        }
-    }
-    
     @objc private func dimmingViewTapped(_ sender: UITapGestureRecognizer) {
-        self.inputBar.textView.resignFirstResponder()
-        self.inputBar.textView.setContentOffset(.zero, animated: false)
-        self.heightConstraints.constant = 50.0
-        self.view.setNeedsLayout()
-        UIView.animate(withDuration: 0.5, animations: {
-            self.dimmingView.alpha = 0.0
-            self.view.layoutIfNeeded()
-        }, completion: { _ in
+        self.hiddenInputBar {
             self.dismiss(animated: false, completion: nil)
-        })
+        }
     }
     
     private var keyboardFrameObserver: NSObjectProtocol? = nil
@@ -97,10 +89,7 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.addObservers()
-        self.inputBar.textView.becomeFirstResponder()
-        UIView.animate(withDuration: 0.3) {
-            self.dimmingView.alpha = 0.3
-        }
+        self.showInputBar {}
     }
     
     public override func viewDidDisappear(_ animated: Bool) {
@@ -159,6 +148,28 @@ extension InputViewController {
 
 extension InputViewController: InputBarDelegate {
     
+    private func showInputBar(withCompletion completion: @escaping () -> Void) {
+        self.inputBar.textView.becomeFirstResponder()
+        UIView.animate(withDuration: 0.5, animations: {
+            self.dimmingView.alpha = 0.3
+        }, completion: { _ in
+            completion()
+        })
+    }
+    
+    private func hiddenInputBar(withCompletion completion: @escaping () -> Void) {
+        self.inputBar.textView.resignFirstResponder()
+        self.inputBar.textView.setContentOffset(.zero, animated: false)
+        self.heightConstraints.constant = 50.0
+        self.view.setNeedsLayout()
+        UIView.animate(withDuration: 0.5, animations: {
+            self.dimmingView.alpha = 0.0
+            self.view.layoutIfNeeded()
+        }, completion: { _ in
+            completion()
+        })
+    }
+    
     func keyboardSendButtonTapped(_ bar: InputBar) {
         
     }
@@ -180,10 +191,12 @@ extension InputViewController: InputBarDelegate {
 
 extension InputViewController {
     
-    static func makeViewController() -> InputViewController {
+    static func makeViewController(placeholder: String? = nil, initialContent: String? = nil) -> InputViewController {
         let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "InputViewController") as! InputViewController
         vc.modalPresentationStyle = .custom
         vc.transitioningDelegate = vc
+        vc.placeholder = placeholder
+        vc.initialContent = initialContent
         return vc
     }
 }
@@ -220,5 +233,46 @@ class InputBar: SafeAreaCompatibleView, UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         guard textView.markedTextRange == nil else { return }
         self.delegate?.textDidChanged(self, text: textView.text)
+    }
+}
+
+
+public final class InputComponentController {
+    
+    public enum Behaviour {
+        case abandon
+        case collect
+    }
+    
+    private weak var viewController: UIViewController?
+    
+    public init(from viewController: UIViewController) {
+        self.viewController = viewController
+    }
+    
+    private var _block: (Behaviour, String) -> Void = { _, _  in }
+    
+    public func showInputComponent(placeholder: String? = nil, initialContent: String? = nil, completion: @escaping (Behaviour, String) -> Void) {
+        guard
+            let host = self.viewController else {
+                return
+        }
+        let vc = InputViewController.makeViewController(placeholder: placeholder, initialContent: initialContent)
+        self._block = completion
+        host.present(vc, animated: false, completion: nil)
+    }
+}
+
+func test() {
+    
+    let controller = InputComponentController(from: UIViewController.init())
+    
+    controller.showInputComponent(placeholder: nil, initialContent: nil) { behaviout, content in
+        switch behaviout {
+        case .abandon:
+            print(content)
+        case .collect:
+            print(content)
+        }
     }
 }
