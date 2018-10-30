@@ -8,6 +8,11 @@
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
+    <customFonts key="customFonts">
+        <array key="PingFang.ttc">
+            <string>PingFangSC-Regular</string>
+        </array>
+    </customFonts>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -18,10 +23,35 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BBb-pq-zCp" customClass="SafeAreaCompatibleView" customModule="LLLLable" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="658" width="375" height="120"/>
-                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <rect key="frame" x="0.0" y="728" width="375" height="50"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aQN-XI-qmm">
+                                        <rect key="frame" x="25" y="7.6666666666666288" width="325" height="35"/>
+                                        <subviews>
+                                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="回复 夏皮皮：" translatesAutoresizingMaskIntoConstraints="NO" id="rV6-SS-5XG">
+                                                <rect key="frame" x="15" y="7.3333333333333712" width="295" height="20"/>
+                                                <color key="backgroundColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.97254901959999995" alpha="1" colorSpace="calibratedRGB"/>
+                                                <color key="textColor" red="0.21176470589999999" green="0.23529411759999999" blue="0.3294117647" alpha="1" colorSpace="calibratedRGB"/>
+                                                <fontDescription key="fontDescription" name="PingFangSC-Regular" family="PingFang SC" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                            </textView>
+                                        </subviews>
+                                        <color key="backgroundColor" red="0.96862745098039216" green="0.96862745098039216" blue="0.97254901960784312" alpha="1" colorSpace="calibratedRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="trailing" secondItem="rV6-SS-5XG" secondAttribute="trailing" constant="15" id="0EK-75-gnw"/>
+                                            <constraint firstAttribute="bottom" secondItem="rV6-SS-5XG" secondAttribute="bottom" constant="7.5" id="HQx-QS-3Pq"/>
+                                            <constraint firstItem="rV6-SS-5XG" firstAttribute="top" secondItem="aQN-XI-qmm" secondAttribute="top" constant="7.5" id="W5F-JI-pJs"/>
+                                            <constraint firstItem="rV6-SS-5XG" firstAttribute="leading" secondItem="aQN-XI-qmm" secondAttribute="leading" constant="15" id="btk-oy-JlD"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="120" id="3Eu-8e-D8t"/>
+                                    <constraint firstItem="aQN-XI-qmm" firstAttribute="leading" secondItem="BBb-pq-zCp" secondAttribute="leading" constant="25" id="3DG-s4-WcJ"/>
+                                    <constraint firstAttribute="height" constant="50" id="3Eu-8e-D8t"/>
+                                    <constraint firstItem="aQN-XI-qmm" firstAttribute="top" secondItem="BBb-pq-zCp" secondAttribute="top" constant="7.5" id="KcI-7e-2kh"/>
+                                    <constraint firstAttribute="bottom" secondItem="aQN-XI-qmm" secondAttribute="bottom" constant="7.5" id="pG0-vE-AHp"/>
+                                    <constraint firstAttribute="trailing" secondItem="aQN-XI-qmm" secondAttribute="trailing" constant="25" id="y8t-KH-l5L"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -40,6 +70,9 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="textView" destination="rV6-SS-5XG" id="wPf-nw-lwq"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -57,25 +90,40 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TI5-MF-ijg" customClass="SafeAreaCompatibleView" customModule="LLLLable" customModuleProvider="target">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TI5-MF-ijg" customClass="InputBar" customModule="LLLLable" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="728" width="375" height="50"/>
                                 <subviews>
-                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="BfP-X0-yqU">
-                                        <rect key="frame" x="12" y="12" width="351" height="26"/>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
-                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                                    </textView>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kTK-h4-JHl">
+                                        <rect key="frame" x="25" y="7.6666666666666288" width="325" height="35"/>
+                                        <subviews>
+                                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="回复 夏皮皮：" translatesAutoresizingMaskIntoConstraints="NO" id="BfP-X0-yqU">
+                                                <rect key="frame" x="15" y="7.3333333333333712" width="295" height="20"/>
+                                                <color key="backgroundColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.97254901959999995" alpha="1" colorSpace="calibratedRGB"/>
+                                                <color key="textColor" red="0.21176470588235294" green="0.23529411764705882" blue="0.32941176470588235" alpha="1" colorSpace="calibratedRGB"/>
+                                                <fontDescription key="fontDescription" name="PingFangSC-Regular" family="PingFang SC" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                            </textView>
+                                        </subviews>
+                                        <color key="backgroundColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.97254901959999995" alpha="1" colorSpace="calibratedRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="BfP-X0-yqU" secondAttribute="bottom" constant="7.5" id="GES-E1-jWV"/>
+                                            <constraint firstAttribute="trailing" secondItem="BfP-X0-yqU" secondAttribute="trailing" constant="15" id="H5O-hT-7k5"/>
+                                            <constraint firstItem="BfP-X0-yqU" firstAttribute="top" secondItem="kTK-h4-JHl" secondAttribute="top" constant="7.5" id="M9s-OT-Aac"/>
+                                            <constraint firstItem="BfP-X0-yqU" firstAttribute="leading" secondItem="kTK-h4-JHl" secondAttribute="leading" constant="15" id="QVy-8l-5xM"/>
+                                        </constraints>
+                                    </view>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="bottom" secondItem="BfP-X0-yqU" secondAttribute="bottom" constant="12" id="1YI-rk-qcb"/>
-                                    <constraint firstItem="BfP-X0-yqU" firstAttribute="leading" secondItem="TI5-MF-ijg" secondAttribute="leading" constant="12" id="8JG-ud-tV2"/>
-                                    <constraint firstAttribute="trailing" secondItem="BfP-X0-yqU" secondAttribute="trailing" constant="12" id="J3l-CU-ov2"/>
-                                    <constraint firstItem="BfP-X0-yqU" firstAttribute="top" secondItem="TI5-MF-ijg" secondAttribute="top" constant="12" id="n23-WC-LMt"/>
+                                    <constraint firstAttribute="bottom" secondItem="kTK-h4-JHl" secondAttribute="bottom" constant="7.5" id="Cpn-sO-keT"/>
+                                    <constraint firstItem="kTK-h4-JHl" firstAttribute="top" secondItem="TI5-MF-ijg" secondAttribute="top" constant="7.5" id="Kqo-rP-R1b"/>
                                     <constraint firstAttribute="height" constant="50" id="pMb-kW-zCo"/>
+                                    <constraint firstAttribute="trailing" secondItem="kTK-h4-JHl" secondAttribute="trailing" constant="25" id="ris-lt-tbW"/>
+                                    <constraint firstItem="kTK-h4-JHl" firstAttribute="leading" secondItem="TI5-MF-ijg" secondAttribute="leading" constant="25" id="xpT-NQ-I8M"/>
                                 </constraints>
+                                <connections>
+                                    <outlet property="textView" destination="BfP-X0-yqU" id="JSd-iz-Fw6"/>
+                                </connections>
                             </view>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

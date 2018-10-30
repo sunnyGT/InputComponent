@@ -10,6 +10,13 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    @IBOutlet weak var textView: UITextView! {
+        didSet {
+            self.textView.textContainer.maximumNumberOfLines = 1
+            self.textView.textContainerInset = .zero
+            self.textView.textContainer.lineFragmentPadding = 0.0
+        }
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
     }
@@ -73,8 +80,6 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
                 strongSelf.bottomConstraints.constant = strongSelf.view.bounds.maxY - localFrame.minY - safeAreaInsetsBottom
             }
             strongSelf.view.setNeedsLayout()
-            strongSelf.bar.setNeedsLayout()
-            strongSelf.bar.layoutIfNeeded()
             UIView.beginAnimations("Animation", context: nil)
             UIView.setAnimationDuration(duration)
             UIView.setAnimationCurve(UIView.AnimationCurve(rawValue: curve) ?? .easeInOut)
@@ -106,5 +111,15 @@ extension InputViewController {
         vc.modalPresentationStyle = .custom
         vc.transitioningDelegate = vc
         return vc
+    }
+}
+
+class InputBar: SafeAreaCompatibleView {
+    
+    @IBOutlet weak var textView: UITextView! {
+        didSet {
+            self.textView.textContainerInset = .zero
+            self.textView.textContainer.lineFragmentPadding = 0.0
+        }
     }
 }
