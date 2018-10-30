@@ -1,0 +1,6 @@
+framework module Pods_LLLLable {
+  umbrella header "Pods-LLLLable-umbrella.h"
+
+  export *
+  module * { export * }
+}
