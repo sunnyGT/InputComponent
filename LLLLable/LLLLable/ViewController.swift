@@ -35,7 +35,11 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
     
     @IBOutlet weak var heightConstraints: NSLayoutConstraint!
     @IBOutlet weak var bottomConstraints: NSLayoutConstraint!
-    @IBOutlet weak var inputBar: InputBar!
+    @IBOutlet weak var inputBar: InputBar! {
+        didSet {
+            self.inputBar.delegate = self
+        }
+    }
     
     @IBOutlet weak var dimmingView: UIView! {
         didSet {
@@ -48,7 +52,7 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        self.inputBar.textView.addObserver(self, forKeyPath: "contentSize", options: [.initial, .old, .new], context: nil)
+        self.heightConstraints.constant = 50.0
     }
     
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -65,10 +69,6 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
         }
     }
     
-    deinit {
-        self.inputBar.textView.removeObserver(self, forKeyPath: "contentSize")
-    }
-    
     private func updateInputBarHeight(_ height: CGFloat, animated: Bool = true) {
         self.heightConstraints.constant = height
         if animated {
@@ -81,8 +81,12 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
     
     @objc private func dimmingViewTapped(_ sender: UITapGestureRecognizer) {
         self.inputBar.textView.resignFirstResponder()
+        self.inputBar.textView.setContentOffset(.zero, animated: false)
+        self.heightConstraints.constant = 50.0
+        self.view.setNeedsLayout()
         UIView.animate(withDuration: 0.5, animations: {
             self.dimmingView.alpha = 0.0
+            self.view.layoutIfNeeded()
         }, completion: { _ in
             self.dismiss(animated: false, completion: nil)
         })
@@ -92,6 +96,27 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        self.addObservers()
+        self.inputBar.textView.becomeFirstResponder()
+        UIView.animate(withDuration: 0.3) {
+            self.dimmingView.alpha = 0.3
+        }
+    }
+    
+    public override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.removeObservers()
+    }
+    
+    public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+        return UIPresentationController(presentedViewController: presented, presenting: presenting)
+    }
+}
+
+extension InputViewController {
+    
+    private func addObservers() {
+        
         self.keyboardFrameObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillChangeFrameNotification, object: nil, queue: .main, using: { [weak self] notification in
             guard
                 let strongSelf = self,
@@ -120,21 +145,36 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
             strongSelf.view.layoutIfNeeded()
             UIView.commitAnimations()
         })
-        self.inputBar.textView.becomeFirstResponder()
-        UIView.animate(withDuration: 0.3) {
-            self.dimmingView.alpha = 0.3
-        }
+        
+        self.inputBar.textView.addObserver(self, forKeyPath: "contentSize", options: [.initial, .old, .new], context: nil)
     }
     
-    public override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
+    private func removeObservers() {
         if let observer = self.keyboardFrameObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+        self.inputBar.textView.removeObserver(self, forKeyPath: "contentSize")
+    }
+}
+
+extension InputViewController: InputBarDelegate {
+    
+    func keyboardSendButtonTapped(_ bar: InputBar) {
+        
     }
     
-    public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        return UIPresentationController(presentedViewController: presented, presenting: presenting)
+    func textDidChanged(_ bar: InputBar, text: String) {
+//        let count = text.utf16.count
+//        switch count {
+//        case 201...:
+//            bar.textCountLabel.isHidden = false
+//            bar.textCountLabel.text = "\(200 - count)"
+//        case 190...200:
+//            bar.textCountLabel.isHidden = false
+//            bar.textCountLabel.text = "\(200 - count)"
+//        default:
+//            bar.textCountLabel.isHidden = true
+//        }
     }
 }
 
@@ -148,12 +188,37 @@ extension InputViewController {
     }
 }
 
-class InputBar: SafeAreaCompatibleView {
+protocol InputBarDelegate: class {
+    
+    func keyboardSendButtonTapped(_ bar: InputBar)
+    
+    func textDidChanged(_ bar: InputBar, text: String)
+}
+
+class InputBar: SafeAreaCompatibleView, UITextViewDelegate {
     
     @IBOutlet weak var textView: UITextView! {
         didSet {
+            self.textView.delegate = self
             self.textView.textContainerInset = .zero
             self.textView.textContainer.lineFragmentPadding = 0.0
         }
+    }
+    @IBOutlet weak var textCountLabel: UILabel!
+    
+    weak var delegate: InputBarDelegate? = nil
+    
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if text == "\n" {
+            self.delegate?.keyboardSendButtonTapped(self)
+            return false
+        } else {
+            return true
+        }
+    }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        guard textView.markedTextRange == nil else { return }
+        self.delegate?.textDidChanged(self, text: textView.text)
     }
 }
