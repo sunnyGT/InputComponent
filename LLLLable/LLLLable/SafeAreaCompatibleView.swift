@@ -53,7 +53,12 @@ open class SafeAreaCompatibleView: UIView {
         super.layoutSubviews()
         guard let superview = superview else { return }
         let superviewBounds = superview.bounds
-        let superviewSafeAreaInsets = superview.safeAreaInsets
+        var superviewSafeAreaInsets = UIEdgeInsets.zero
+        if #available(iOS 11, *){
+            
+             superviewSafeAreaInsets = superview.safeAreaInsets
+        }
+        
         let viewFrame = self.frame
         if !viewFrame.minY.isLessThanOrEqualTo(0.0) && viewFrame.minY.isLessThanOrEqualTo(superviewSafeAreaInsets.top) {
             self.top?.constant = -viewFrame.minY
