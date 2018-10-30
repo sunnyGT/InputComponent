@@ -47,7 +47,7 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
     
     @objc private func dimmingViewTapped(_ sender: UITapGestureRecognizer) {
         self.textView.resignFirstResponder()
-        UIView.animate(withDuration: 0.3, animations: {
+        UIView.animate(withDuration: 0.5, animations: {
             self.dimmingView.alpha = 0.0
         }, completion: { _ in
             self.dismiss(animated: false, completion: nil)
@@ -74,10 +74,10 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
                     return 0
                 }
             }()
-            if localFrame.minY >= strongSelf.view.bounds.maxY {
-                strongSelf.bottomConstraints.constant = strongSelf.view.bounds.maxY - localFrame.minY
-            } else {
+            if localFrame.minY.isLess(than: strongSelf.view.bounds.maxY - 1.0) {
                 strongSelf.bottomConstraints.constant = strongSelf.view.bounds.maxY - localFrame.minY - safeAreaInsetsBottom
+            } else {
+                strongSelf.bottomConstraints.constant = 0.0
             }
             strongSelf.view.setNeedsLayout()
             UIView.beginAnimations("Animation", context: nil)
