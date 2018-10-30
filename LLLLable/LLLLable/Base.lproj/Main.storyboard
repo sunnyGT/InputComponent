@@ -71,7 +71,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="textView" destination="rV6-SS-5XG" id="wPf-nw-lwq"/>
+                        <outlet property="textView" destination="rV6-SS-5XG" id="s3O-Qw-5hF"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -91,35 +91,44 @@
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TI5-MF-ijg" customClass="InputBar" customModule="LLLLable" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="728" width="375" height="50"/>
+                                <rect key="frame" x="0.0" y="658" width="375" height="120"/>
                                 <subviews>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kTK-h4-JHl">
-                                        <rect key="frame" x="25" y="7.6666666666666288" width="325" height="35"/>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Udf-lE-eUh">
+                                        <rect key="frame" x="25" y="7.6666666666666288" width="325" height="105"/>
+                                        <color key="backgroundColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.97254901959999995" alpha="1" colorSpace="calibratedRGB"/>
+                                    </view>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="nJe-tn-3Ka">
+                                        <rect key="frame" x="40" y="15" width="295" height="90"/>
                                         <subviews>
                                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="回复 夏皮皮：" translatesAutoresizingMaskIntoConstraints="NO" id="BfP-X0-yqU">
-                                                <rect key="frame" x="15" y="7.3333333333333712" width="295" height="20"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="295" height="90"/>
                                                 <color key="backgroundColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.97254901959999995" alpha="1" colorSpace="calibratedRGB"/>
+                                                <color key="tintColor" red="0.0" green="0.73725490199999999" blue="0.73725490199999999" alpha="1" colorSpace="calibratedRGB"/>
                                                 <color key="textColor" red="0.21176470588235294" green="0.23529411764705882" blue="0.32941176470588235" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="PingFangSC-Regular" family="PingFang SC" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                             </textView>
+                                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="1000" text="-12" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lPM-yr-2ga">
+                                                <rect key="frame" x="0.0" y="0.0" width="295" height="0.0"/>
+                                                <color key="backgroundColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.97254901959999995" alpha="1" colorSpace="calibratedRGB"/>
+                                                <fontDescription key="fontDescription" name="PingFangSC-Regular" family="PingFang SC" pointSize="12"/>
+                                                <color key="textColor" red="0.93725490196078431" green="0.45882352941176469" blue="0.45882352941176469" alpha="1" colorSpace="calibratedRGB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
                                         </subviews>
-                                        <color key="backgroundColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.97254901959999995" alpha="1" colorSpace="calibratedRGB"/>
-                                        <constraints>
-                                            <constraint firstAttribute="bottom" secondItem="BfP-X0-yqU" secondAttribute="bottom" constant="7.5" id="GES-E1-jWV"/>
-                                            <constraint firstAttribute="trailing" secondItem="BfP-X0-yqU" secondAttribute="trailing" constant="15" id="H5O-hT-7k5"/>
-                                            <constraint firstItem="BfP-X0-yqU" firstAttribute="top" secondItem="kTK-h4-JHl" secondAttribute="top" constant="7.5" id="M9s-OT-Aac"/>
-                                            <constraint firstItem="BfP-X0-yqU" firstAttribute="leading" secondItem="kTK-h4-JHl" secondAttribute="leading" constant="15" id="QVy-8l-5xM"/>
-                                        </constraints>
-                                    </view>
+                                    </stackView>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="bottom" secondItem="kTK-h4-JHl" secondAttribute="bottom" constant="7.5" id="Cpn-sO-keT"/>
-                                    <constraint firstItem="kTK-h4-JHl" firstAttribute="top" secondItem="TI5-MF-ijg" secondAttribute="top" constant="7.5" id="Kqo-rP-R1b"/>
-                                    <constraint firstAttribute="height" constant="50" id="pMb-kW-zCo"/>
-                                    <constraint firstAttribute="trailing" secondItem="kTK-h4-JHl" secondAttribute="trailing" constant="25" id="ris-lt-tbW"/>
-                                    <constraint firstItem="kTK-h4-JHl" firstAttribute="leading" secondItem="TI5-MF-ijg" secondAttribute="leading" constant="25" id="xpT-NQ-I8M"/>
+                                    <constraint firstItem="nJe-tn-3Ka" firstAttribute="leading" secondItem="TI5-MF-ijg" secondAttribute="leading" constant="40" id="PIe-Iz-vBc"/>
+                                    <constraint firstAttribute="trailing" secondItem="nJe-tn-3Ka" secondAttribute="trailing" constant="40" id="bQc-S8-IhC"/>
+                                    <constraint firstItem="Udf-lE-eUh" firstAttribute="leading" secondItem="TI5-MF-ijg" secondAttribute="leading" constant="25" id="hpd-VW-EcA"/>
+                                    <constraint firstAttribute="bottom" secondItem="Udf-lE-eUh" secondAttribute="bottom" constant="7.5" id="n2X-kk-lAk"/>
+                                    <constraint firstAttribute="height" constant="120" id="pMb-kW-zCo"/>
+                                    <constraint firstItem="nJe-tn-3Ka" firstAttribute="top" secondItem="TI5-MF-ijg" secondAttribute="top" constant="15" id="q6T-hh-ebu"/>
+                                    <constraint firstAttribute="bottom" secondItem="nJe-tn-3Ka" secondAttribute="bottom" constant="15" id="xH2-VN-K01"/>
+                                    <constraint firstAttribute="trailing" secondItem="Udf-lE-eUh" secondAttribute="trailing" constant="25" id="xQe-n2-JXl"/>
+                                    <constraint firstItem="Udf-lE-eUh" firstAttribute="top" secondItem="TI5-MF-ijg" secondAttribute="top" constant="7.5" id="ym6-4U-lrh"/>
                                 </constraints>
                                 <connections>
                                     <outlet property="textView" destination="BfP-X0-yqU" id="JSd-iz-Fw6"/>
@@ -139,10 +148,10 @@
                         <viewLayoutGuide key="safeArea" id="RAi-ya-cFs"/>
                     </view>
                     <connections>
-                        <outlet property="bar" destination="TI5-MF-ijg" id="6R6-o3-6Zg"/>
                         <outlet property="bottomConstraints" destination="Tnd-dx-Ers" id="Ozd-Yl-xpR"/>
                         <outlet property="dimmingView" destination="zKL-So-2wh" id="UyN-93-8P9"/>
-                        <outlet property="textView" destination="BfP-X0-yqU" id="RVJ-ce-Vdf"/>
+                        <outlet property="heightConstraints" destination="pMb-kW-zCo" id="W78-i4-9lQ"/>
+                        <outlet property="inputBar" destination="TI5-MF-ijg" id="RMb-qJ-NM2"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ruc-My-9wS" userLabel="First Responder" sceneMemberID="firstResponder"/>

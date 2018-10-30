@@ -18,6 +18,7 @@ class ViewController: UIViewController {
             self.textView.isEditable = false
             self.textView.isSelectable = false
             self.textView.isScrollEnabled = false
+            self.textView.isUserInteractionEnabled = false
         }
     }
     override func viewDidLoad() {
@@ -32,10 +33,9 @@ class ViewController: UIViewController {
 
 public final class InputViewController: UIViewController, UIViewControllerTransitioningDelegate {
     
-    @IBOutlet weak var textView: UITextView!
-    
+    @IBOutlet weak var heightConstraints: NSLayoutConstraint!
     @IBOutlet weak var bottomConstraints: NSLayoutConstraint!
-    @IBOutlet weak var bar: SafeAreaCompatibleView!
+    @IBOutlet weak var inputBar: InputBar!
     
     @IBOutlet weak var dimmingView: UIView! {
         didSet {
@@ -44,12 +44,43 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
         }
     }
     
+    private var observer: NSKeyValueObservation? = nil
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
+        self.inputBar.textView.addObserver(self, forKeyPath: "contentSize", options: [.initial, .old, .new], context: nil)
+    }
+    
+    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "contentSize" {
+            guard
+                let c = change,
+                let value = c[.newKey] as? NSValue else {
+                    return
+            }
+            let height = max(min(value.cgSizeValue.height + 30.0, 132.0), 50.0)
+            self.updateInputBarHeight(height)
+        } else {
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
+        }
+    }
+    
+    deinit {
+        self.inputBar.textView.removeObserver(self, forKeyPath: "contentSize")
+    }
+    
+    private func updateInputBarHeight(_ height: CGFloat, animated: Bool = true) {
+        self.heightConstraints.constant = height
+        if animated {
+            self.view.setNeedsLayout()
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+        }
     }
     
     @objc private func dimmingViewTapped(_ sender: UITapGestureRecognizer) {
-        self.textView.resignFirstResponder()
+        self.inputBar.textView.resignFirstResponder()
         UIView.animate(withDuration: 0.5, animations: {
             self.dimmingView.alpha = 0.0
         }, completion: { _ in
@@ -89,7 +120,7 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
             strongSelf.view.layoutIfNeeded()
             UIView.commitAnimations()
         })
-        self.textView.becomeFirstResponder()
+        self.inputBar.textView.becomeFirstResponder()
         UIView.animate(withDuration: 0.3) {
             self.dimmingView.alpha = 0.3
         }
