@@ -36,25 +36,27 @@ class ViewController: UIViewController {
 
 public final class InputViewController: UIViewController, UIViewControllerTransitioningDelegate {
     
+    private let contentSizeKeyPath = "contentSize"
+    
+    private var observer: NSKeyValueObservation? = nil
+    
     private var placeholder: String? = nil
     private var initialContent: String? = nil
     
     @IBOutlet weak var heightConstraints: NSLayoutConstraint!
     @IBOutlet weak var bottomConstraints: NSLayoutConstraint!
+    
     @IBOutlet weak var inputBar: InputBar! {
         didSet {
             self.inputBar.delegate = self
         }
     }
-    
     @IBOutlet weak var dimmingView: UIView! {
         didSet {
             self.dimmingView.alpha = 0.0
             self.dimmingView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dimmingViewTapped(_:))))
         }
     }
-    
-    private var observer: NSKeyValueObservation? = nil
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,8 +65,32 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
         self.inputBar.textView.text = self.initialContent
     }
     
+    @objc private func dimmingViewTapped(_ sender: UITapGestureRecognizer) {
+        self.inputBar.textView.resignFirstResponder()
+    }
+    
+    private var keyboardFrameObserver: NSObjectProtocol? = nil
+    
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.addObservers()
+        self.inputBar.textView.becomeFirstResponder()
+    }
+    
+    public override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.removeObservers()
+    }
+    
+    public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+        return UIPresentationController(presentedViewController: presented, presenting: presenting)
+    }
+}
+
+extension InputViewController {
+    
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == "contentSize" {
+        if keyPath == self.contentSizeKeyPath {
             guard
                 let c = change,
                 let value = c[.newKey] as? NSValue else {
@@ -81,34 +107,7 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
         }
     }
     
-    @objc private func dimmingViewTapped(_ sender: UITapGestureRecognizer) {
-        self.hiddenInputBar {
-            self.dismiss(animated: false, completion: nil)
-        }
-    }
-    
-    private var keyboardFrameObserver: NSObjectProtocol? = nil
-    
-    public override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        self.addObservers()
-        self.showInputBar {}
-    }
-    
-    public override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        self.removeObservers()
-    }
-    
-    public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        return UIPresentationController(presentedViewController: presented, presenting: presenting)
-    }
-}
-
-extension InputViewController {
-    
     private func addObservers() {
-        
         self.keyboardFrameObserver = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillChangeFrameNotification, object: nil, queue: .main, using: { [weak self] notification in
             guard
                 let strongSelf = self,
@@ -137,7 +136,7 @@ extension InputViewController {
             strongSelf.view.layoutIfNeeded()
             UIView.commitAnimations()
         })
-        self.inputBar.textView.addObserver(self, forKeyPath: "contentSize", options: [.initial, .new], context: nil)
+        self.inputBar.textView.addObserver(self, forKeyPath: self.contentSizeKeyPath, options: [.initial, .new], context: nil)
     }
     
     private func removeObservers() {
@@ -150,30 +149,24 @@ extension InputViewController {
 
 extension InputViewController: InputBarDelegate {
     
-    private func showInputBar(withCompletion completion: @escaping () -> Void) {
-        self.inputBar.textView.becomeFirstResponder()
-        UIView.animate(withDuration: 0.5, animations: {
+    func inputBarDidBeginEditing(_ bar: InputBar) {
+        UIView.animate(withDuration: 0.5, delay: 0.0, options: .curveEaseInOut, animations: {
             self.dimmingView.alpha = 0.3
-        }, completion: { _ in
-            completion()
-        })
+        }, completion: nil)
     }
     
-    private func hiddenInputBar(withCompletion completion: @escaping () -> Void) {
-        self.inputBar.textView.resignFirstResponder()
-        self.inputBar.textView.setContentOffset(.zero, animated: false)
+    func inputBarDidEndEditing(_ bar: InputBar) {
+        inputBar.textView.setContentOffset(.zero, animated: false)
         self.heightConstraints.constant = 50.0
         self.view.setNeedsLayout()
-        UIView.animate(withDuration: 0.5, animations: {
+        UIView.animate(withDuration: 0.5, delay: 0.0, options: .curveEaseInOut, animations: {
             self.dimmingView.alpha = 0.0
             self.view.layoutIfNeeded()
         }, completion: { _ in
-            completion()
+            self.dismiss(animated: false, completion: {
+                print("Dismiss completion.......")
+            })
         })
-    }
-    
-    func keyboardSendButtonTapped(_ bar: InputBar) {
-        
     }
     
     func textDidChanged(_ bar: InputBar, text: String) {
@@ -205,9 +198,11 @@ extension InputViewController {
 
 protocol InputBarDelegate: class {
     
-    func keyboardSendButtonTapped(_ bar: InputBar)
-    
     func textDidChanged(_ bar: InputBar, text: String)
+    
+    func inputBarDidBeginEditing(_ bar: InputBar)
+    
+    func inputBarDidEndEditing(_ bar: InputBar)
 }
 
 class InputBar: SafeAreaCompatibleView, UITextViewDelegate {
@@ -225,7 +220,7 @@ class InputBar: SafeAreaCompatibleView, UITextViewDelegate {
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         if text == "\n" {
-            self.delegate?.keyboardSendButtonTapped(self)
+            textView.resignFirstResponder()
             return false
         } else {
             return true
@@ -235,6 +230,14 @@ class InputBar: SafeAreaCompatibleView, UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         guard textView.markedTextRange == nil else { return }
         self.delegate?.textDidChanged(self, text: textView.text)
+    }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        self.delegate?.inputBarDidBeginEditing(self)
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        self.delegate?.inputBarDidEndEditing(self)
     }
 }
 
@@ -280,16 +283,6 @@ func test() {
 }
 
 class PlaceholderTextView: UITextView {
-    
-//    override func becomeFirstResponder() -> Bool {
-//        let willBecomeFirstResponder = super.becomeFirstResponder()
-//        return willBecomeFirstResponder
-//    }
-//
-//    override func resignFirstResponder() -> Bool {
-//        let willResignFirstResponder = super.resignFirstResponder()
-//        return willResignFirstResponder
-//    }
     
     override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
