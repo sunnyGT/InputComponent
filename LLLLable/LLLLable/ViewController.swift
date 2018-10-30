@@ -10,7 +10,7 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    @IBOutlet weak var textView: UITextView! {
+    @IBOutlet weak var textView: PlaceholderTextView! {
         didSet {
             self.textView.textContainer.maximumNumberOfLines = 1
             self.textView.textContainerInset = .zero
@@ -19,6 +19,9 @@ class ViewController: UIViewController {
             self.textView.isSelectable = false
             self.textView.isScrollEnabled = false
             self.textView.isUserInteractionEnabled = false
+            self.textView.placeholerText = "回复：夏皮皮"
+            self.textView.placeholderTextColor = .lightGray
+            self.textView.text = ""
         }
     }
     override func viewDidLoad() {
@@ -134,8 +137,7 @@ extension InputViewController {
             strongSelf.view.layoutIfNeeded()
             UIView.commitAnimations()
         })
-        
-        self.inputBar.textView.addObserver(self, forKeyPath: "contentSize", options: [.initial, .old, .new], context: nil)
+        self.inputBar.textView.addObserver(self, forKeyPath: "contentSize", options: [.initial, .new], context: nil)
     }
     
     private func removeObservers() {
@@ -273,6 +275,78 @@ func test() {
             print(content)
         case .collect:
             print(content)
+        }
+    }
+}
+
+class PlaceholderTextView: UITextView {
+    
+//    override func becomeFirstResponder() -> Bool {
+//        let willBecomeFirstResponder = super.becomeFirstResponder()
+//        return willBecomeFirstResponder
+//    }
+//
+//    override func resignFirstResponder() -> Bool {
+//        let willResignFirstResponder = super.resignFirstResponder()
+//        return willResignFirstResponder
+//    }
+    
+    override init(frame: CGRect, textContainer: NSTextContainer?) {
+        super.init(frame: frame, textContainer: textContainer)
+        self.commonInit()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        self.commonInit()
+    }
+    
+    private var textChangedObserver: NSObjectProtocol? = nil
+    
+    private func commonInit() {
+        self.textChangedObserver = NotificationCenter.default.addObserver(forName: UITextView.textDidChangeNotification, object: nil, queue: .main) { [weak self] n in
+            guard
+                let textView = n.object as? PlaceholderTextView, textView == self else {
+                    return
+            }
+            textView.setNeedsDisplay()
+        }
+    }
+    
+    deinit {
+        if let observer = self.textChangedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+    
+    var placeholerText: String? = nil {
+        didSet {
+            self.setNeedsDisplay()
+        }
+    }
+    
+    var placeholderTextColor: UIColor? = nil {
+        didSet {
+            self.setNeedsDisplay()
+        }
+    }
+    
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+        if !self.hasText, let placeholer = self.placeholerText, !placeholer.isEmpty {
+            let rect = CGRect(
+                x: self.textContainerInset.left + self.textContainer.lineFragmentPadding,
+                y: self.textContainerInset.top,
+                width: self.bounds.width - self.textContainerInset.left - self.textContainerInset.right - self.textContainer.lineFragmentPadding * 2.0,
+                height: self.bounds.height - self.textContainerInset.top - self.textContainerInset.bottom
+            )
+            let attrbutes: [NSAttributedString.Key: Any] = {
+                var dict: [NSAttributedString.Key: Any] = [:]
+                dict[.foregroundColor] = self.placeholderTextColor
+                dict[.font] = self.font
+                return dict
+            }()
+            (placeholer as NSString).draw(in: rect, withAttributes: attrbutes)
         }
     }
 }
