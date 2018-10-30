@@ -15,6 +15,9 @@ class ViewController: UIViewController {
             self.textView.textContainer.maximumNumberOfLines = 1
             self.textView.textContainerInset = .zero
             self.textView.textContainer.lineFragmentPadding = 0.0
+            self.textView.isEditable = false
+            self.textView.isSelectable = false
+            self.textView.isScrollEnabled = false
         }
     }
     override func viewDidLoad() {
