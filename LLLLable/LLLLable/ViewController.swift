@@ -56,7 +56,8 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
     private let contentSizeKeyPath = "contentSize"
     
     private var observer: NSKeyValueObservation? = nil
-    
+    private var keyboardFrameObserver: NSObjectProtocol? = nil
+
     private var placeholder: String? = nil
     private var initialContent: String? = nil
   
@@ -65,11 +66,13 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
     @IBOutlet weak var bottomConstraints: NSLayoutConstraint!
 
     
+    
     @IBOutlet weak var inputBar: InputBar! {
         didSet {
             self.inputBar.delegate = self
         }
     }
+    
     @IBOutlet weak var dimmingView: UIView! {
         didSet {
             self.dimmingView.alpha = 0.0
@@ -77,7 +80,6 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
         }
     }
     
-    private var observer: NSKeyValueObservation? = nil
     weak var delegate: InputViewControllerDelegate? = nil
 
     
@@ -124,8 +126,6 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
         self.inputBar.textView.resignFirstResponder()
     }
     
-    private var keyboardFrameObserver: NSObjectProtocol? = nil
-    
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.addObservers()
@@ -145,24 +145,6 @@ public final class InputViewController: UIViewController, UIViewControllerTransi
 }
 
 extension InputViewController {
-    
-    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == self.contentSizeKeyPath {
-            guard
-                let c = change,
-                let value = c[.newKey] as? NSValue else {
-                    return
-            }
-            let height = max(min(value.cgSizeValue.height + 30.0, 132.0), 50.0)
-            self.heightConstraints.constant = height
-            self.view.setNeedsLayout()
-            UIView.animate(withDuration: 0.3) {
-                self.view.layoutIfNeeded()
-            }
-        } else {
-            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-        }
-    }
     
     private func addObservers() {
       
@@ -271,6 +253,7 @@ extension InputViewController: InputBarDelegate {
             bar.textCountLabel.isHidden = true
             
         }
+    }
 
     func inputBarDidBeginEditing(_ bar: InputBar) {
         UIView.animate(withDuration: 0.5, delay: 0.0, options: .curveEaseInOut, animations: {
@@ -313,11 +296,11 @@ extension InputViewController {
     }
 }
 
-protocol InputBarDelegate: class {
-    
-    func keyboardSendButtonTapped(_ bar: InputBar)
-    func textDidChanged(_ bar: InputBar, text: String)
-}
+//protocol InputBarDelegate: class {
+//
+//    func keyboardSendButtonTapped(_ bar: InputBar)
+//    func textDidChanged(_ bar: InputBar, text: String)
+//}
 
 
 // MARK: - TODO
@@ -340,60 +323,60 @@ class InputViewAppreaence: NSObject {
 
 // MARK: InputViewAppearence
 
-class InputBar: SafeAreaCompatibleView, UITextViewDelegate {
-    
-    @IBOutlet weak var textView: UITextView! {
-        didSet {
-            self.textView.delegate = self
-            self.textView.textContainerInset = .zero
-            self.textView.textContainer.lineFragmentPadding = 0.0
-        }
-    }
-    @IBOutlet weak var textCountLabel: UILabel!
-    
-    weak var delegate: InputBarDelegate? = nil
-    
-    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        if text == "\n" {
-            self.delegate?.keyboardSendButtonTapped(self)
-            return false
-        } else {
-            return true
-        }
-    }
-    
-    func textViewDidChange(_ textView: UITextView) {
-        guard textView.markedTextRange == nil else { return }
-        self.delegate?.textDidChanged(self, text: textView.text)
-    }
-}
+//class InputBar: SafeAreaCompatibleView, UITextViewDelegate {
+//
+//    @IBOutlet weak var textView: UITextView! {
+//        didSet {
+//            self.textView.delegate = self
+//            self.textView.textContainerInset = .zero
+//            self.textView.textContainer.lineFragmentPadding = 0.0
+//        }
+//    }
+//    @IBOutlet weak var textCountLabel: UILabel!
+//
+//    weak var delegate: InputBarDelegate? = nil
+//
+//    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+//        if text == "\n" {
+//            self.delegate?.keyboardSendButtonTapped(self)
+//            return false
+//        } else {
+//            return true
+//        }
+//    }
+//
+//    func textViewDidChange(_ textView: UITextView) {
+//        guard textView.markedTextRange == nil else { return }
+//        self.delegate?.textDidChanged(self, text: textView.text)
+//    }
+//}
 
 
-public final class InputComponentController {
-    
-    public enum Behaviour {
-        case abandon
-        case collect
-    }
-    
-    private weak var viewController: UIViewController?
-    
-    public init(from viewController: UIViewController) {
-        self.viewController = viewController
-    }
-    
-    private var _block: (Behaviour, String) -> Void = { _, _  in }
-    
-    public func showInputComponent(placeholder: String? = nil, initialContent: String? = nil, completion: @escaping (Behaviour, String) -> Void) {
-        guard
-            let host = self.viewController else {
-                return
-        }
-        let vc = InputViewController.makeViewController(placeholder: placeholder, initialContent: initialContent)
-        self._block = completion
-        host.present(vc, animated: false, completion: nil)
-    }
-}
+//public final class InputComponentController {
+//
+//    public enum Behaviour {
+//        case abandon
+//        case collect
+//    }
+//
+//    private weak var viewController: UIViewController?
+//
+//    public init(from viewController: UIViewController) {
+//        self.viewController = viewController
+//    }
+//
+//    private var _block: (Behaviour, String) -> Void = { _, _  in }
+//
+//    public func showInputComponent(placeholder: String? = nil, initialContent: String? = nil, completion: @escaping (Behaviour, String) -> Void) {
+//        guard
+//            let host = self.viewController else {
+//                return
+//        }
+//        let vc = InputViewController.makeViewController(placeholder: placeholder, initialContent: initialContent)
+//        self._block = completion
+//        host.present(vc, animated: false, completion: nil)
+//    }
+//}
 
 func test() {
     
@@ -564,64 +547,64 @@ public final class InputComponentController: InputViewControllerDelegate {
     }
 }
 
-class PlaceholderTextView: UITextView {
-    
-    override init(frame: CGRect, textContainer: NSTextContainer?) {
-        super.init(frame: frame, textContainer: textContainer)
-        self.commonInit()
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        self.commonInit()
-    }
-    
-    private var textChangedObserver: NSObjectProtocol? = nil
-    
-    private func commonInit() {
-        self.textChangedObserver = NotificationCenter.default.addObserver(forName: UITextView.textDidChangeNotification, object: nil, queue: .main) { [weak self] n in
-            guard
-                let textView = n.object as? PlaceholderTextView, textView == self else {
-                    return
-            }
-            textView.setNeedsDisplay()
-        }
-    }
-    
-    deinit {
-        if let observer = self.textChangedObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
-    }
-    
-    var placeholerText: String? = nil {
-        didSet {
-            self.setNeedsDisplay()
-        }
-    }
-    
-    var placeholderTextColor: UIColor? = nil {
-        didSet {
-            self.setNeedsDisplay()
-        }
-    }
-    
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-        if !self.hasText, let placeholer = self.placeholerText, !placeholer.isEmpty {
-            let rect = CGRect(
-                x: self.textContainerInset.left + self.textContainer.lineFragmentPadding,
-                y: self.textContainerInset.top,
-                width: self.bounds.width - self.textContainerInset.left - self.textContainerInset.right - self.textContainer.lineFragmentPadding * 2.0,
-                height: self.bounds.height - self.textContainerInset.top - self.textContainerInset.bottom
-            )
-            let attrbutes: [NSAttributedString.Key: Any] = {
-                var dict: [NSAttributedString.Key: Any] = [:]
-                dict[.foregroundColor] = self.placeholderTextColor
-                dict[.font] = self.font
-                return dict
-            }()
-            (placeholer as NSString).draw(in: rect, withAttributes: attrbutes)
-        }
-    }
-}
+//class PlaceholderTextView: UITextView {
+//
+//    override init(frame: CGRect, textContainer: NSTextContainer?) {
+//        super.init(frame: frame, textContainer: textContainer)
+//        self.commonInit()
+//    }
+//
+//    required init?(coder aDecoder: NSCoder) {
+//        super.init(coder: aDecoder)
+//        self.commonInit()
+//    }
+//
+//    private var textChangedObserver: NSObjectProtocol? = nil
+//
+//    private func commonInit() {
+//        self.textChangedObserver = NotificationCenter.default.addObserver(forName: UITextView.textDidChangeNotification, object: nil, queue: .main) { [weak self] n in
+//            guard
+//                let textView = n.object as? PlaceholderTextView, textView == self else {
+//                    return
+//            }
+//            textView.setNeedsDisplay()
+//        }
+//    }
+//
+//    deinit {
+//        if let observer = self.textChangedObserver {
+//            NotificationCenter.default.removeObserver(observer)
+//        }
+//    }
+//
+//    var placeholerText: String? = nil {
+//        didSet {
+//            self.setNeedsDisplay()
+//        }
+//    }
+//
+//    var placeholderTextColor: UIColor? = nil {
+//        didSet {
+//            self.setNeedsDisplay()
+//        }
+//    }
+//
+//    override func draw(_ rect: CGRect) {
+//        super.draw(rect)
+//        if !self.hasText, let placeholer = self.placeholerText, !placeholer.isEmpty {
+//            let rect = CGRect(
+//                x: self.textContainerInset.left + self.textContainer.lineFragmentPadding,
+//                y: self.textContainerInset.top,
+//                width: self.bounds.width - self.textContainerInset.left - self.textContainerInset.right - self.textContainer.lineFragmentPadding * 2.0,
+//                height: self.bounds.height - self.textContainerInset.top - self.textContainerInset.bottom
+//            )
+//            let attrbutes: [NSAttributedString.Key: Any] = {
+//                var dict: [NSAttributedString.Key: Any] = [:]
+//                dict[.foregroundColor] = self.placeholderTextColor
+//                dict[.font] = self.font
+//                return dict
+//            }()
+//            (placeholer as NSString).draw(in: rect, withAttributes: attrbutes)
+//        }
+//    }
+//}
